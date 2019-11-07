@@ -71,8 +71,8 @@ function detectOS() {
     OS=$(echo $(uname) | tr '[:upper:]' '[:lower:]')
 
     case "$OS" in
-        # Minimalist GNU for Windows
-        cygwin* | mingw* | msys*) OS='windows' ;;
+    # Minimalist GNU for Windows
+    cygwin* | mingw* | msys*) OS='windows' ;;
     esac
 }
 
@@ -80,12 +80,12 @@ function detectOS() {
 function detectArch() {
     ARCH=$(uname -m)
     case $ARCH in
-        armv7*) ARCH="arm" ;;
-        aarch64) ARCH="arm64" ;;
-        x86) ARCH="386" ;;
-        x86_64) ARCH="amd64" ;;
-        i686) ARCH="386" ;;
-        i386) ARCH="386" ;;
+    armv7*) ARCH="arm" ;;
+    aarch64) ARCH="arm64" ;;
+    x86) ARCH="386" ;;
+    x86_64) ARCH="amd64" ;;
+    i686) ARCH="386" ;;
+    i386) ARCH="386" ;;
     esac
 }
 
@@ -128,9 +128,9 @@ onessl_found || {
     ARTIFACT="https://github.com/kubepack/onessl/releases/download/${ONESSL_VERSION}"
     ONESSL_BIN=onessl-${OS}-${ARCH}
     case "$OS" in
-        cygwin* | mingw* | msys*)
-            ONESSL_BIN=${ONESSL_BIN}.exe
-            ;;
+    cygwin* | mingw* | msys*)
+        ONESSL_BIN=${ONESSL_BIN}.exe
+        ;;
     esac
 
     DOWNLOAD_URL=${ARTIFACT}/${ONESSL_BIN}
@@ -147,7 +147,7 @@ onessl_found || {
 # ref: https://jonalmeida.com/posts/2013/05/26/different-ways-to-implement-flags-in-bash/
 # ref: http://tldp.org/LDP/abs/html/comparison-ops.html
 
-export VAULT_OPERATOR_NAMESPACE=kube-system
+export VAULT_OPERATOR_NAMESPACE=vault
 export VAULT_OPERATOR_SERVICE_ACCOUNT=vault-operator
 export VAULT_OPERATOR_RUN_ON_MASTER=0
 export VAULT_OPERATOR_ENABLE_VALIDATING_WEBHOOK=false
@@ -199,7 +199,7 @@ show_help() {
     echo " "
     echo "options:"
     echo "-h, --help                             show brief help"
-    echo "-n, --namespace=NAMESPACE              specify namespace (default: kube-system)"
+    echo "-n, --namespace=NAMESPACE              specify namespace (default: vault)"
     echo "    --docker-registry                  docker registry used to pull Vault images (default: kubevault)"
     echo "    --image-pull-secret                name of secret used to pull Vault images"
     echo "    --run-on-master                    run Vault operator on master"
@@ -220,142 +220,142 @@ show_help() {
 
 while test $# -gt 0; do
     case "$1" in
-        -h | --help)
-            show_help
-            exit 0
-            ;;
-        -n)
-            shift
-            if test $# -gt 0; then
-                export VAULT_OPERATOR_NAMESPACE=$1
-            else
-                echo "no namespace specified"
-                exit 1
-            fi
-            shift
-            ;;
-        --namespace*)
-            export VAULT_OPERATOR_NAMESPACE=$(echo $1 | sed -e 's/^[^=]*=//g')
-            shift
-            ;;
-        --docker-registry*)
-            export VAULT_OPERATOR_DOCKER_REGISTRY=$(echo $1 | sed -e 's/^[^=]*=//g')
-            shift
-            ;;
-        --image-pull-secret*)
-            secret=$(echo $1 | sed -e 's/^[^=]*=//g')
-            export VAULT_OPERATOR_IMAGE_PULL_SECRET="name: '$secret'"
-            shift
-            ;;
-        --enable-mutating-webhook*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_ENABLE_MUTATING_WEBHOOK=false
-            fi
-            shift
-            ;;
-        --enable-validating-webhook*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_ENABLE_VALIDATING_WEBHOOK=false
-            fi
-            shift
-            ;;
-        --bypass-validating-webhook-xray*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_BYPASS_VALIDATING_WEBHOOK_XRAY=false
-            else
-                export VAULT_OPERATOR_BYPASS_VALIDATING_WEBHOOK_XRAY=true
-            fi
-            shift
-            ;;
-        --use-kubeapiserver-fqdn-for-aks*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_USE_KUBEAPISERVER_FQDN_FOR_AKS=false
-            else
-                export VAULT_OPERATOR_USE_KUBEAPISERVER_FQDN_FOR_AKS=true
-            fi
-            shift
-            ;;
-        --enable-analytics*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_ENABLE_ANALYTICS=false
-            fi
-            shift
-            ;;
-        --install-catalog*)
-            shift
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "false" ]; then
-                export VAULT_OPERATOR_CATALOG=false
-            fi
-            ;;
-        --run-on-master)
-            export VAULT_OPERATOR_RUN_ON_MASTER=1
-            shift
-            ;;
-        --uninstall)
-            export VAULT_OPERATOR_UNINSTALL=1
-            shift
-            ;;
-        --purge)
-            export VAULT_OPERATOR_PURGE=1
-            shift
-            ;;
-        --monitoring-agent*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" != "$MONITORING_AGENT_BUILTIN" ] && [ "$val" != "$MONITORING_AGENT_COREOS_OPERATOR" ]; then
-                echo 'Invalid monitoring agent. Use "builtin" or "coreos-operator"'
-                exit 1
-            else
-                export MONITORING_AGENT="$val"
-            fi
-            shift
-            ;;
-        --monitor-operator*)
-            val=$(echo $1 | sed -e 's/^[^=]*=//g')
-            if [ "$val" = "true" ]; then
-                export MONITOR_OPERATOR="$val"
-            fi
-            shift
-            ;;
-        --prometheus-namespace*)
-            export PROMETHEUS_NAMESPACE=$(echo $1 | sed -e 's/^[^=]*=//g')
-            shift
-            ;;
-        --servicemonitor-label*)
-            label=$(echo $1 | sed -e 's/^[^=]*=//g')
-            # split label into key value pair
-            IFS='='
-            pair=($label)
-            unset IFS
-            # check if the label is valid
-            if [ ! ${#pair[@]} = 2 ]; then
-                echo "Invalid ServiceMonitor label format. Use '--servicemonitor-label=key=value'"
-                exit 1
-            fi
-            export SERVICE_MONITOR_LABEL_KEY="${pair[0]}"
-            export SERVICE_MONITOR_LABEL_VALUE="${pair[1]}"
-            shift
-            ;;
-        --cluster-name*)
-            export VAULT_OPERATOR_CLUSTER_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
-            shift
-            ;;
-        *)
-            echo "Error: unknown flag:" $1
-            show_help
+    -h | --help)
+        show_help
+        exit 0
+        ;;
+    -n)
+        shift
+        if test $# -gt 0; then
+            export VAULT_OPERATOR_NAMESPACE=$1
+        else
+            echo "no namespace specified"
             exit 1
-            ;;
+        fi
+        shift
+        ;;
+    --namespace*)
+        export VAULT_OPERATOR_NAMESPACE=$(echo $1 | sed -e 's/^[^=]*=//g')
+        shift
+        ;;
+    --docker-registry*)
+        export VAULT_OPERATOR_DOCKER_REGISTRY=$(echo $1 | sed -e 's/^[^=]*=//g')
+        shift
+        ;;
+    --image-pull-secret*)
+        secret=$(echo $1 | sed -e 's/^[^=]*=//g')
+        export VAULT_OPERATOR_IMAGE_PULL_SECRET="name: '$secret'"
+        shift
+        ;;
+    --enable-mutating-webhook*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_ENABLE_MUTATING_WEBHOOK=false
+        fi
+        shift
+        ;;
+    --enable-validating-webhook*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_ENABLE_VALIDATING_WEBHOOK=false
+        fi
+        shift
+        ;;
+    --bypass-validating-webhook-xray*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_BYPASS_VALIDATING_WEBHOOK_XRAY=false
+        else
+            export VAULT_OPERATOR_BYPASS_VALIDATING_WEBHOOK_XRAY=true
+        fi
+        shift
+        ;;
+    --use-kubeapiserver-fqdn-for-aks*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_USE_KUBEAPISERVER_FQDN_FOR_AKS=false
+        else
+            export VAULT_OPERATOR_USE_KUBEAPISERVER_FQDN_FOR_AKS=true
+        fi
+        shift
+        ;;
+    --enable-analytics*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_ENABLE_ANALYTICS=false
+        fi
+        shift
+        ;;
+    --install-catalog*)
+        shift
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "false" ]; then
+            export VAULT_OPERATOR_CATALOG=false
+        fi
+        ;;
+    --run-on-master)
+        export VAULT_OPERATOR_RUN_ON_MASTER=1
+        shift
+        ;;
+    --uninstall)
+        export VAULT_OPERATOR_UNINSTALL=1
+        shift
+        ;;
+    --purge)
+        export VAULT_OPERATOR_PURGE=1
+        shift
+        ;;
+    --monitoring-agent*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" != "$MONITORING_AGENT_BUILTIN" ] && [ "$val" != "$MONITORING_AGENT_COREOS_OPERATOR" ]; then
+            echo 'Invalid monitoring agent. Use "builtin" or "coreos-operator"'
+            exit 1
+        else
+            export MONITORING_AGENT="$val"
+        fi
+        shift
+        ;;
+    --monitor-operator*)
+        val=$(echo $1 | sed -e 's/^[^=]*=//g')
+        if [ "$val" = "true" ]; then
+            export MONITOR_OPERATOR="$val"
+        fi
+        shift
+        ;;
+    --prometheus-namespace*)
+        export PROMETHEUS_NAMESPACE=$(echo $1 | sed -e 's/^[^=]*=//g')
+        shift
+        ;;
+    --servicemonitor-label*)
+        label=$(echo $1 | sed -e 's/^[^=]*=//g')
+        # split label into key value pair
+        IFS='='
+        pair=($label)
+        unset IFS
+        # check if the label is valid
+        if [ ! ${#pair[@]} = 2 ]; then
+            echo "Invalid ServiceMonitor label format. Use '--servicemonitor-label=key=value'"
+            exit 1
+        fi
+        export SERVICE_MONITOR_LABEL_KEY="${pair[0]}"
+        export SERVICE_MONITOR_LABEL_VALUE="${pair[1]}"
+        shift
+        ;;
+    --cluster-name*)
+        export VAULT_OPERATOR_CLUSTER_NAME=$(echo $1 | sed -e 's/^[^=]*=//g')
+        shift
+        ;;
+    *)
+        echo "Error: unknown flag:" $1
+        show_help
+        exit 1
+        ;;
     esac
 done
 
 export PROMETHEUS_NAMESPACE=${PROMETHEUS_NAMESPACE:-$VAULT_OPERATOR_NAMESPACE}
 
-if [ "$VAULT_OPERATOR_NAMESPACE" != "kube-system" ]; then
+if [ "$VAULT_OPERATOR_NAMESPACE" != "vault" ]; then
     export VAULT_OPERATOR_PRIORITY_CLASS=""
 fi
 
@@ -429,7 +429,7 @@ if [ "$VAULT_OPERATOR_UNINSTALL" -eq 1 ]; then
 fi
 
 echo "checking whether extended apiserver feature is enabled"
-$ONESSL has-keys configmap --namespace=kube-system --keys=requestheader-client-ca-file extension-apiserver-authentication || {
+$ONESSL has-keys configmap --namespace=vault --keys=requestheader-client-ca-file extension-apiserver-authentication || {
     echo "Set --requestheader-client-ca-file flag on Kubernetes apiserver"
     exit 1
 }
@@ -545,16 +545,16 @@ if [ "$MONITOR_OPERATOR" = "true" ] && [ "$MONITORING_AGENT" != "$MONITORING_AGE
     fi
 
     case "$MONITORING_AGENT" in
-        "$MONITORING_AGENT_BUILTIN")
-            kubectl annotate service vault-operator -n "$VAULT_OPERATOR_NAMESPACE" --overwrite \
-                prometheus.io/scrape="true" \
-                prometheus.io/path="/metrics" \
-                prometheus.io/port="8443" \
-                prometheus.io/scheme="https"
-            ;;
-        "$MONITORING_AGENT_COREOS_OPERATOR")
-            ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor.yaml | $ONESSL envsubst | kubectl apply -f -
-            ;;
+    "$MONITORING_AGENT_BUILTIN")
+        kubectl annotate service vault-operator -n "$VAULT_OPERATOR_NAMESPACE" --overwrite \
+            prometheus.io/scrape="true" \
+            prometheus.io/path="/metrics" \
+            prometheus.io/port="8443" \
+            prometheus.io/scheme="https"
+        ;;
+    "$MONITORING_AGENT_COREOS_OPERATOR")
+        ${SCRIPT_LOCATION}hack/deploy/monitor/servicemonitor.yaml | $ONESSL envsubst | kubectl apply -f -
+        ;;
     esac
 fi
 
